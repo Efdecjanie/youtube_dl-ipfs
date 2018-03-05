@@ -10,6 +10,7 @@ try:
 except ImportError:
     print("You need an ipfs_db module to run this program!")
     print("pip install --user git+https://github.com/Efdecjanie/ipfs-db.git")
+    raise SystemExit
 try:
     import youtube_dl
 except ImportError:
@@ -22,6 +23,7 @@ except ImportError:
     raise SystemExit
 
 import os
+import json
 
 class MyLogger(object):
     def debug(self, msg):
@@ -32,10 +34,11 @@ class MyLogger(object):
 
     def error(self, msg):
         pass
+
 ipfs = ipfsapi.connect()
 db = IPFSDB()
-
 app = Flask(__name__)
+
 @app.route('/')
 def index():
     return send_from_directory("static/", "index.html")
@@ -51,8 +54,7 @@ def add():
         result = ydl.extract_info(
             url,
             download=True
-        )
-    
+        ) 
     dir = os.listdir()
     for name in dir:
         if name.split('.')[0] == result['id']:
@@ -60,4 +62,8 @@ def add():
             os.remove(str(name))
             return hash
 
+@app.route('/files.json')
+def files_json():
+    files = db.list_all_files()
+    return json.dumps(files)
 app.run(port=3600)
