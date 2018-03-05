@@ -1,9 +1,15 @@
+#!/bin/env python3
 try:
     import ipfsapi
 except ImportError:
     print("You need an ipfsapi module to run this program!")
     print("pip install ipfsapi")
     raise SystemExit
+try:
+    from ipfs_db import IPFSDB
+except ImportError:
+    print("You need an ipfs_db module to run this program!")
+    print("pip install --user git+https://github.com/Efdecjanie/ipfs-db.git")
 try:
     import youtube_dl
 except ImportError:
@@ -27,6 +33,7 @@ class MyLogger(object):
     def error(self, msg):
         pass
 ipfs = ipfsapi.connect()
+db = IPFSDB()
 
 app = Flask(__name__)
 @app.route('/')
@@ -49,9 +56,8 @@ def add():
     dir = os.listdir()
     for name in dir:
         if name.split('.')[0] == result['id']:
-            hash = ipfs.add(str(name))
-            print(hash)
+            hash = db.add_file(str(name))
             os.remove(str(name))
-            return hash['Hash']
+            return hash
 
 app.run(port=3600)
